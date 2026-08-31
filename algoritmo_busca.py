@@ -20,10 +20,10 @@ with pdfplumber.open("edital.pdf") as pdf:
             texto_bruto += texto_da_pagina + " " 
             
     texto_continuo = texto_bruto.replace('\n', ' ')
-    inicio_lista = texto_continuo.find("PALAVRA_CHAVE_INICIO")
+    inicio_lista = texto_continuo.find(PALAVRA_CHAVE_INICIO)
     
     if inicio_lista != -1:
-        texto_candidatos = texto_continuo[inicio_lista + 12:]
+        texto_candidatos = texto_continuo[inicio_lista + len(PALAVRA_CHAVE_INICIO):]
     else:
         texto_candidatos = texto_continuo 
         
@@ -40,11 +40,11 @@ with pdfplumber.open("edital.pdf") as pdf:
         partes = candidato.split(',')
         
         if len(partes) >= QTD_MINIMA_CAMPOS:
-            inscricao = partes[0].strip()
-            nome = partes[1].strip()
+            inscricao = partes[POSICAO_INSCRICAO].strip()
+            nome = partes[POSICAO_NOME].strip()
             
             try:
-                nota_final = float(partes[-1].strip())
+                nota_final = float(partes[POSICAO_NOTA].strip())
                 dados_completos.append({
                     "inscricao": inscricao,
                     "nome": nome,
@@ -58,3 +58,23 @@ with open("dados_candidatos.json", "w", encoding="utf-8") as arquivo_json:
     json.dump(dados_completos, arquivo_json, ensure_ascii=False, indent=4)
 
 print(f"Extração concluída! {len(dados_completos)} candidatos encontrados e salvos no JSON.")
+
+def ordenar_por_nota(dicionario):
+    ordenado_nota = sorted(dicionario, key=lambda dicionario: dicionario["nota"], reverse=True)
+    return ordenado_nota
+
+
+
+def encontra_candidato_e_colocacao(nome_completo):
+    lista_ordenada_nota = ordenar_por_nota(dados_completos)
+    for i, pessoa in enumerate(lista_ordenada_nota):
+        if pessoa["nome"] == nome_completo:
+            posicao_nota = i + 1   
+            
+            print(f"O candidato {nome_completo}, ficou na seguinte posição: {posicao_nota}º")
+            return posicao_nota
+            
+    print(f"Candidato '{nome_completo}' não encontrado.")
+    return None
+
+encontra_candidato_e_colocacao("Ana Beatriz Cavalcante Amorim") 
