@@ -53,3 +53,8 @@ with pdfplumber.open("edital.pdf") as pdf:
             except ValueError:
                 pass
 
+
+with open("dados_candidatos.json", "w", encoding="utf-8") as arquivo_json:
+    json.dump(dados_completos, arquivo_json, ensure_ascii=False, indent=4)
+
+print(f"Extração concluída! {len(dados_completos)} candidatos encontrados e salvos no JSON.")
